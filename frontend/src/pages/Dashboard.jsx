@@ -18,7 +18,7 @@ const PERIODS = [
 export default function Dashboard() {
   const [period, setPeriod] = useState('month');
   const { data, loading, refresh } = useDashboard(period);
-  const { items: recent, refresh: refreshRecent, remove: removeTx } = useTransactions({ limit: 8 });
+  const { items: recent, refresh: refreshRecent, remove: removeTx, togglePaid: togglePaidTx } = useTransactions({ limit: 8 });
   const [forecast, setForecast] = useState(null);
   const [exporting, setExporting] = useState(false);
 
@@ -214,6 +214,7 @@ export default function Dashboard() {
             await removeTx(id);
             refresh();
           }}
+          onTogglePaid={togglePaidTx}
           emptyMessage="Adicione sua primeira transação no botão flutuante."
         />
       </div>
