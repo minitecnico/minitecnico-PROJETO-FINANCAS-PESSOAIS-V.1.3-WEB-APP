@@ -30,7 +30,7 @@ export default function TransactionListPage({ type = 'income' }) {
     return {};
   })();
 
-  const { items, total, loading, refresh, remove } = useTransactions({
+  const { items, total, loading, refresh, remove, togglePaid } = useTransactions({
     type,
     limit: 100,
     ...dateRange,
@@ -112,6 +112,7 @@ export default function TransactionListPage({ type = 'income' }) {
         loading={loading}
         onChange={refresh}
         onDelete={remove}
+        onTogglePaid={togglePaid}
         emptyMessage={`Nenhuma ${isIncome ? 'receita' : 'despesa'} encontrada para o período selecionado.`}
       />
 
