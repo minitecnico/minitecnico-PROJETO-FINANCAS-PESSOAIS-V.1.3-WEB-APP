@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent; /* Remove highlight azul ao tocar em iOS */
+  }
+
+  body {
+    background: #f7f7f5;
+    background-image: linear-gradient(
+        to right,
+        rgba(22, 22, 16, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(22, 22, 16, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+    /* Permite que o conteúdo respeite a safe-area do iPhone */
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  ::selection {
+    background: #c4f542;
+    color: #161610;
+  }
+
+  /* Inputs no iOS não dão zoom se font-size for >= 16px */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  @media (min-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: inherit;
+    }
+  }
+}
+
+@layer components {
+  /* Card "neo-brutalista": borda sólida, sombra dura */
+  .card-flat {
+    @apply bg-white border-2 border-ink-900 shadow-flat-sm md:shadow-flat rounded-none transition-all;
+  }
+
+  @media (hover: hover) {
+    .card-flat:hover {
+      @apply -translate-x-0.5 -translate-y-0.5;
+      box-shadow: 6px 6px 0 0 rgba(22, 22, 16, 1);
+    }
+  }
+
+  /* Botões — altura mínima de 44px para boa área de toque (padrão iOS/Android) */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 min-h-[44px] bg-ink-900 text-white font-semibold border-2 border-ink-900 shadow-flat-sm hover:bg-accent hover:text-ink-900 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-sm md:text-base;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 min-h-[44px] bg-accent text-ink-900 font-semibold border-2 border-ink-900 shadow-flat-sm hover:bg-accent-dark active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-sm md:text-base;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[44px] text-ink-700 hover:bg-ink-100 transition-colors text-sm md:text-base;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-negative hover:bg-red-50 border-2 border-transparent hover:border-negative transition-colors;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 min-h-[48px] bg-white border-2 border-ink-900 focus:outline-none focus:shadow-flat-sm focus:-translate-x-0.5 focus:-translate-y-0.5 transition-all font-body;
+  }
+
+  .label {
+    @apply block text-xs font-semibold uppercase tracking-wider text-ink-700 mb-2;
+  }
+
+  .stat-number {
+    @apply font-mono font-semibold tabular-nums;
+  }
+
+  /* Floating Action Button responsivo (mobile + desktop) */
+  .fab {
+    @apply fixed z-40 w-14 h-14 md:w-14 md:h-14
+           bg-accent border-2 border-ink-900 shadow-flat flex items-center justify-center
+           hover:bg-accent-dark active:translate-x-1 active:translate-y-1 active:shadow-none
+           transition-all group
+           right-4 md:right-6;
+    /* Mobile: 80px acima da bottom nav. Desktop: 24px do bottom. */
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  }
+
+  @media (min-width: 768px) {
+    .fab {
+      bottom: 24px;
+    }
+  }
+
+  /* Stagger animation pra cards aparecerem em sequência */
+  .stagger > * {
+    opacity: 0;
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.1s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.2s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.3s; }
+}
+
+/* Scrollbar customizada (apenas desktop) */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #eeeeea; }
+  ::-webkit-scrollbar-thumb { background: #4f4f3e; border-radius: 0; }
+  ::-webkit-scrollbar-thumb:hover { background: #161610; }
+}
