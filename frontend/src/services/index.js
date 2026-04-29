@@ -80,6 +80,21 @@ export const transactionService = {
     const { error } = await supabase.from('transactions').delete().eq('id', id);
     if (error) throw error;
   },
+
+  /**
+   * Alterna o status de pagamento de uma despesa.
+   * Atualização otimista: o frontend já reflete a mudança antes da resposta.
+   */
+  async togglePaid(id, paid) {
+    const { data, error } = await supabase
+      .from('transactions')
+      .update({ paid })
+      .eq('id', id)
+      .select(`*, category:categories(*), credit_card:credit_cards(*)`)
+      .single();
+    if (error) throw error;
+    return data;
+  },
 };
 
 export const categoryService = {
