@@ -69,10 +69,10 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 md:gap-4">
         <div className="min-w-0">
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-ink-500 font-semibold">
-            Painel principal
+            Bem vindo!
           </p>
           <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-1 leading-tight">
-            Suas finanças em um relance
+            💸​ Vivendo Abaixo Da Linha Da Pobreza 💸​
           </h1>
         </div>
 
@@ -169,7 +169,7 @@ export default function Dashboard() {
                 Simulação
               </p>
             </div>
-            <h3 className="font-display text-xl md:text-2xl font-bold">Saldo projetado</h3>
+            <h3 className="font-display text-xl md:text-2xl font-bold">Saldo Projetado</h3>
             <p className="text-xs md:text-sm text-ink-300 mt-1">
               Baseado na média dos últimos 3 meses
             </p>
@@ -204,7 +204,7 @@ export default function Dashboard() {
       {/* Transações recentes */}
       <div>
         <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h3 className="font-display text-xl md:text-2xl font-bold">Transações recentes</h3>
+          <h3 className="font-display text-xl md:text-2xl font-bold">Transações Recentes</h3>
         </div>
         <TransactionList
           items={recent}
