@@ -43,5 +43,24 @@ export function useTransactions(filters = {}) {
     await fetchData();
   }
 
-  return { items, total, loading, error, refresh: fetchData, create, update, remove };
+  /**
+   * Atualização otimista: muda o estado localmente antes da resposta do servidor.
+   * Se der erro, reverte e refaz fetch.
+   */
+  async function togglePaid(id, currentPaid) {
+    const newPaid = !currentPaid;
+
+    // Otimista: atualiza UI imediatamente
+    setItems((prev) => prev.map((t) => (t.id === id ? { ...t, paid: newPaid } : t)));
+
+    try {
+      await transactionService.togglePaid(id, newPaid);
+    } catch (err) {
+      // Reverte se der erro
+      setItems((prev) => prev.map((t) => (t.id === id ? { ...t, paid: currentPaid } : t)));
+      setError(err.message || 'Erro ao atualizar status');
+    }
+  }
+
+  return { items, total, loading, error, refresh: fetchData, create, update, remove, togglePaid };
 }
