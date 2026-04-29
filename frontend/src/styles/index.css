@@ -5,7 +5,7 @@
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent; /* Remove highlight azul ao tocar em iOS */
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -17,7 +17,6 @@
       ),
       linear-gradient(to bottom, rgba(22, 22, 16, 0.04) 1px, transparent 1px);
     background-size: 32px 32px;
-    /* Permite que o conteúdo respeite a safe-area do iPhone */
     min-height: 100vh;
     min-height: 100dvh;
   }
@@ -56,7 +55,7 @@
     }
   }
 
-  /* Botões — altura mínima de 44px para boa área de toque (padrão iOS/Android) */
+  /* Botões — altura mínima de 44px (padrão iOS/Android) */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 min-h-[44px] bg-ink-900 text-white font-semibold border-2 border-ink-900 shadow-flat-sm hover:bg-accent hover:text-ink-900 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all text-sm md:text-base;
   }
@@ -85,14 +84,13 @@
     @apply font-mono font-semibold tabular-nums;
   }
 
-  /* Floating Action Button responsivo (mobile + desktop) */
+  /* Floating Action Button — note: 'group' é aplicado direto no JSX, não aqui */
   .fab {
-    @apply fixed z-40 w-14 h-14 md:w-14 md:h-14
+    @apply fixed z-40 w-14 h-14
            bg-accent border-2 border-ink-900 shadow-flat flex items-center justify-center
            hover:bg-accent-dark active:translate-x-1 active:translate-y-1 active:shadow-none
-           transition-all group
+           transition-all
            right-4 md:right-6;
-    /* Mobile: 80px acima da bottom nav. Desktop: 24px do bottom. */
     bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
   }
 
