@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { categoryService, transactionService, cardService } from '../services';
 import { parseAmount } from '../utils/format';
+import { useMonth } from '../context/MonthContext';
 
 /**
  * Formulário de transação — funciona em mobile/desktop.
@@ -8,12 +9,19 @@ import { parseAmount } from '../utils/format';
  */
 export default function TransactionForm({ initial = null, onSaved, onCancel, defaultType = 'expense' }) {
   const isEdit = !!initial;
+  const { isCurrentMonth, startDate: monthStart } = useMonth();
+
+  // Default da data:
+  //  - Editando? mantém a data original
+  //  - No mês atual? data de hoje
+  //  - Em outro mês? dia 1 do mês selecionado (evita cadastrar em mês errado por engano)
+  const defaultDate = initial?.date
+    || (isCurrentMonth ? new Date().toISOString().slice(0, 10) : monthStart);
+
   const [type, setType] = useState(initial?.type || defaultType);
   const [amount, setAmount] = useState(initial?.amount?.toString().replace('.', ',') || '');
   const [description, setDescription] = useState(initial?.description || '');
-  const [date, setDate] = useState(
-    initial?.date || new Date().toISOString().slice(0, 10)
-  );
+  const [date, setDate] = useState(defaultDate);
   const [categoryId, setCategoryId] = useState(initial?.category?.id || '');
   const [creditCardId, setCreditCardId] = useState(initial?.credit_card?.id || '');
   const [paymentMethod, setPaymentMethod] = useState(initial?.credit_card ? 'card' : 'account');

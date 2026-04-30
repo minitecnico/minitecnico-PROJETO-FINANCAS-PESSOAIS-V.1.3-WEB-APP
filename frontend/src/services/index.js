@@ -228,13 +228,14 @@ export const cardService = {
 
 /**
  * DashboardService — usa as RPC functions criadas no schema.sql
+ * Aceita mês de referência ('YYYY-MM') para todas as agregações.
  */
 export const dashboardService = {
-  async summary(period = 'month') {
+  async summary(period = 'month', referenceMonth = null) {
     const [balance, periodSummary, byCategory, monthlyHistory] = await Promise.all([
-      supabase.rpc('get_balance').then((r) => r.data?.[0] || { balance: 0, total_income: 0, total_expense: 0 }),
-      supabase.rpc('get_period_summary', { p_period: period }).then((r) => r.data?.[0] || { income: 0, expense: 0, balance: 0, tx_count: 0 }),
-      supabase.rpc('get_expenses_by_category').then((r) => r.data || []),
+      supabase.rpc('get_balance', { p_month: referenceMonth }).then((r) => r.data?.[0] || { balance: 0, total_income: 0, total_expense: 0 }),
+      supabase.rpc('get_period_summary', { p_period: period, p_reference: referenceMonth }).then((r) => r.data?.[0] || { income: 0, expense: 0, balance: 0, tx_count: 0 }),
+      supabase.rpc('get_expenses_by_category', { p_month: referenceMonth }).then((r) => r.data || []),
       supabase.rpc('get_monthly_history', { p_months: 6 }).then((r) => r.data || []),
     ]);
 

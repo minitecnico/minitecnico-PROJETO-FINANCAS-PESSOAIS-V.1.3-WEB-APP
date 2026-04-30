@@ -1,11 +1,13 @@
 import { useEffect, useState, useCallback } from 'react';
 import { dashboardService } from '../services';
+import { useMonth } from '../context/MonthContext';
 
 /**
  * Encapsula o fetching dos dados do dashboard.
- * Expõe `refresh()` para reagir após mutations (ex: nova transação).
+ * Atualiza automaticamente quando o mês selecionado muda.
  */
 export function useDashboard(period = 'month') {
+  const { month } = useMonth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +15,7 @@ export function useDashboard(period = 'month') {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const result = await dashboardService.summary(period);
+      const result = await dashboardService.summary(period, month);
       setData(result);
       setError(null);
     } catch (err) {
@@ -21,7 +23,7 @@ export function useDashboard(period = 'month') {
     } finally {
       setLoading(false);
     }
-  }, [period]);
+  }, [period, month]);
 
   useEffect(() => {
     fetchData();

@@ -8,17 +8,14 @@ import TransactionList from '../components/TransactionList';
 import { useTransactions } from '../hooks/useTransactions';
 import { formatCurrency } from '../utils/format';
 import InstallBanner from '../components/InstallBanner';
-
-const PERIODS = [
-  { value: 'day', label: 'Hoje' },
-  { value: 'week', label: 'Semana' },
-  { value: 'month', label: 'Mês' },
-];
+import MonthSelector from '../components/MonthSelector';
+import { useMonth } from '../context/MonthContext';
 
 export default function Dashboard() {
-  const [period, setPeriod] = useState('month');
-  const { data, loading, refresh } = useDashboard(period);
+  // Não precisamos mais do filtro de período local — o mês já vem do seletor global
+  const { data, loading, refresh } = useDashboard('month');
   const { items: recent, refresh: refreshRecent, remove: removeTx, togglePaid: togglePaidTx } = useTransactions({ limit: 8 });
+  const { label: monthLabel } = useMonth();
   const [forecast, setForecast] = useState(null);
   const [exporting, setExporting] = useState(false);
 
@@ -69,10 +66,10 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 md:gap-4">
         <div className="min-w-0">
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-ink-500 font-semibold">
-            Bem vindo!
+            Painel principal
           </p>
           <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-1 leading-tight">
-            💸Painel Financeiro💸​
+            Suas finanças em um relance
           </h1>
         </div>
 
@@ -87,23 +84,11 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Seletor de mês — controla todo o conteúdo do Dashboard */}
+      <MonthSelector />
+
       {/* Banner de instalação PWA (some quando instalado/dispensado) */}
       <InstallBanner />
-
-      {/* Filtro de período */}
-      <div className="inline-flex border-2 border-ink-900 w-full sm:w-auto">
-        {PERIODS.map((p) => (
-          <button
-            key={p.value}
-            onClick={() => setPeriod(p.value)}
-            className={`flex-1 sm:flex-none px-4 py-2.5 text-sm font-semibold transition-colors min-h-[44px] ${
-              period === p.value ? 'bg-ink-900 text-white' : 'bg-white hover:bg-ink-100'
-            } ${p.value !== 'day' ? 'border-l-2 border-ink-900' : ''}`}
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
 
       {/* Alertas */}
       {data.alerts.length > 0 && (
@@ -131,22 +116,22 @@ export default function Dashboard() {
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5 stagger">
         <StatCard
-          label="Saldo atual"
-          sublabel="Total em conta"
+          label="Saldo do mês"
+          sublabel={monthLabel}
           value={data.balance.balance}
           variant="balance"
           icon={Wallet}
         />
         <StatCard
           label="Receitas"
-          sublabel={`Período: ${period === 'day' ? 'hoje' : period === 'week' ? 'semana' : 'mês'}`}
+          sublabel={monthLabel}
           value={data.periodSummary.income}
           variant="income"
           icon={TrendingUp}
         />
         <StatCard
           label="Despesas"
-          sublabel={`Período: ${period === 'day' ? 'hoje' : period === 'week' ? 'semana' : 'mês'}`}
+          sublabel={monthLabel}
           value={data.periodSummary.expense}
           variant="expense"
           icon={TrendingDown}
@@ -169,7 +154,7 @@ export default function Dashboard() {
                 Simulação
               </p>
             </div>
-            <h3 className="font-display text-xl md:text-2xl font-bold">Saldo Projetado</h3>
+            <h3 className="font-display text-xl md:text-2xl font-bold">Saldo projetado</h3>
             <p className="text-xs md:text-sm text-ink-300 mt-1">
               Baseado na média dos últimos 3 meses
             </p>
@@ -201,10 +186,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Transações recentes */}
+      {/* Transações recentes do mês */}
       <div>
         <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h3 className="font-display text-xl md:text-2xl font-bold">Transações Recentes</h3>
+          <h3 className="font-display text-xl md:text-2xl font-bold">
+            Transações de {monthLabel}
+          </h3>
         </div>
         <TransactionList
           items={recent}
@@ -215,7 +202,7 @@ export default function Dashboard() {
             refresh();
           }}
           onTogglePaid={togglePaidTx}
-          emptyMessage="Adicione sua primeira transação no botão flutuante."
+          emptyMessage={`Nenhuma transação em ${monthLabel}. Use o botão "+" para adicionar.`}
         />
       </div>
     </div>

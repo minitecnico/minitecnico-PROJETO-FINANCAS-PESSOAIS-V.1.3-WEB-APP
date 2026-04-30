@@ -17,7 +17,7 @@ export default function FloatingAddButton({ onAdded }) {
     <>
       <button
         onClick={open}
-        className="fab"
+        className="fab group"
         aria-label="Adicionar transação"
       >
         <Plus

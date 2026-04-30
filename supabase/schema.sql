@@ -63,6 +63,7 @@ create table public.transactions (
   notes           text,
   installments    int default 1,
   installment_no  int default 1,
+  paid            boolean not null default false,
   created_at      timestamptz default now()
 );
 
@@ -70,6 +71,7 @@ create table public.transactions (
 create index idx_transactions_user_date on public.transactions(user_id, date desc);
 create index idx_transactions_user_type on public.transactions(user_id, type);
 create index idx_transactions_card on public.transactions(credit_card_id) where credit_card_id is not null;
+create index idx_transactions_paid on public.transactions(user_id, paid) where type = 'expense';
 create index idx_categories_user on public.categories(user_id);
 create index idx_cards_user on public.credit_cards(user_id) where active = true;
 
