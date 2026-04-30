@@ -1,20 +1,24 @@
 import { useState, useEffect } from 'react';
-import { categoryService, transactionService, cardService } from '../services';
+import { Repeat } from 'lucide-react';
+import { categoryService, transactionService, cardService, recurringService } from '../services';
 import { parseAmount } from '../utils/format';
 import { useMonth } from '../context/MonthContext';
 
 /**
- * Formulário de transação — funciona em mobile/desktop.
- * Ordem dos botões: cancelar acima, salvar abaixo no mobile (mais ergonômico).
+ * Formulário de transação.
+ * --------------------------------------------------------------
+ * Suporta:
+ *  - Receitas e despesas
+ *  - Cartão de crédito (apenas despesas)
+ *  - Recorrência mensal (cria modelo + transação do mês atual)
+ *
+ * Recorrência só aparece em modo "criação", não em edição.
+ * Editar uma transação avulsa não a transforma em recorrente.
  */
 export default function TransactionForm({ initial = null, onSaved, onCancel, defaultType = 'expense' }) {
   const isEdit = !!initial;
-  const { isCurrentMonth, startDate: monthStart } = useMonth();
+  const { isCurrentMonth, startDate: monthStart, month: currentMonthString } = useMonth();
 
-  // Default da data:
-  //  - Editando? mantém a data original
-  //  - No mês atual? data de hoje
-  //  - Em outro mês? dia 1 do mês selecionado (evita cadastrar em mês errado por engano)
   const defaultDate = initial?.date
     || (isCurrentMonth ? new Date().toISOString().slice(0, 10) : monthStart);
 
@@ -25,6 +29,7 @@ export default function TransactionForm({ initial = null, onSaved, onCancel, def
   const [categoryId, setCategoryId] = useState(initial?.category?.id || '');
   const [creditCardId, setCreditCardId] = useState(initial?.credit_card?.id || '');
   const [paymentMethod, setPaymentMethod] = useState(initial?.credit_card ? 'card' : 'account');
+  const [isRecurring, setIsRecurring] = useState(false);
 
   const [categories, setCategories] = useState([]);
   const [cards, setCards] = useState([]);
@@ -53,10 +58,12 @@ export default function TransactionForm({ initial = null, onSaved, onCancel, def
     setSubmitting(true);
 
     try {
+      const parsedAmount = parseAmount(amount);
+      const trimmedDesc = description.trim();
       const payload = {
         type,
-        amount: parseAmount(amount),
-        description: description.trim(),
+        amount: parsedAmount,
+        description: trimmedDesc,
         date,
         category_id: categoryId,
         credit_card_id: type === 'expense' && paymentMethod === 'card' ? creditCardId : null,
@@ -71,9 +78,39 @@ export default function TransactionForm({ initial = null, onSaved, onCancel, def
 
       if (isEdit) {
         await transactionService.update(initial.id, payload);
+      } else if (isRecurring) {
+        // 1. Cria o MODELO recorrente
+        const dayOfMonth = new Date(date + 'T00:00:00').getDate();
+        const startMonth = `${currentMonthString}-01`;
+        const recurring = await recurringService.create({
+          type,
+          amount: parsedAmount,
+          description: trimmedDesc,
+          category_id: categoryId,
+          credit_card_id: payload.credit_card_id,
+          day_of_month: dayOfMonth,
+          start_month: startMonth,
+        });
+        // 2. Cria a transação do mês atual já linkada ao modelo
+        // (chamando direto o supabase pra incluir recurring_id)
+        const { supabase } = await import('../services/supabase');
+        const { data: { user } } = await supabase.auth.getUser();
+        const { error: txErr } = await supabase.from('transactions').insert({
+          user_id: user.id,
+          type,
+          amount: parsedAmount,
+          description: trimmedDesc,
+          date,
+          category_id: categoryId,
+          credit_card_id: payload.credit_card_id,
+          recurring_id: recurring.id,
+          paid: type === 'income', // receita já vem como recebida
+        });
+        if (txErr) throw txErr;
       } else {
         await transactionService.create(payload);
       }
+
       onSaved?.();
     } catch (err) {
       setError(err.message || 'Erro ao salvar');
@@ -208,19 +245,53 @@ export default function TransactionForm({ initial = null, onSaved, onCancel, def
         </div>
       )}
 
+      {/* Recorrência — só aparece em modo criação */}
+      {!isEdit && (
+        <label
+          className={`flex items-start gap-3 p-3 md:p-4 border-2 cursor-pointer transition-colors ${
+            isRecurring ? 'border-ink-900 bg-accent/30' : 'border-ink-300 hover:border-ink-900 bg-white'
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={isRecurring}
+            onChange={(e) => setIsRecurring(e.target.checked)}
+            className="mt-0.5 w-5 h-5 accent-ink-900 cursor-pointer"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 font-semibold text-sm">
+              <Repeat className="w-4 h-4" strokeWidth={2.5} />
+              É recorrente?
+            </div>
+            <p className="text-xs text-ink-600 mt-0.5">
+              {isRecurring
+                ? `Será criada automaticamente todo mês no mesmo dia (${
+                    new Date(date + 'T00:00:00').getDate()
+                  }).`
+                : 'Marque para repetir essa transação todos os meses.'}
+            </p>
+          </div>
+        </label>
+      )}
+
       {error && (
         <div className="px-4 py-3 bg-red-50 border-2 border-negative text-negative text-sm">
           {error}
         </div>
       )}
 
-      {/* No mobile: Cancelar em cima, Salvar embaixo (polegar fica perto). Desktop: lado a lado */}
       <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center gap-3 pt-2">
         <button type="button" onClick={onCancel} className="btn-ghost">
           Cancelar
         </button>
         <button type="submit" disabled={submitting} className="btn-accent flex-1 disabled:opacity-60">
-          {submitting ? 'Salvando…' : isEdit ? 'Salvar alterações' : 'Adicionar transação'}
+          {submitting
+            ? 'Salvando…'
+            : isEdit
+              ? 'Salvar alterações'
+              : isRecurring
+                ? 'Criar recorrência'
+                : 'Adicionar transação'}
         </button>
       </div>
     </form>

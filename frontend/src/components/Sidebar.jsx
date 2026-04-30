@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, CreditCard, Tag, LogOut, Wallet } from 'lucide-react';
+import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, CreditCard, Tag, LogOut, Wallet, Repeat } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/incomes', label: 'Receitas', icon: ArrowUpCircle },
   { to: '/expenses', label: 'Despesas', icon: ArrowDownCircle },
+  { to: '/recurring', label: 'Recorrências', icon: Repeat },
   { to: '/cards', label: 'Cartões', icon: CreditCard },
   { to: '/categories', label: 'Categorias', icon: Tag },
 ];

@@ -1,12 +1,14 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, CreditCard, Tag } from 'lucide-react';
+import { LayoutDashboard, ArrowDownCircle, ArrowUpCircle, CreditCard, Repeat } from 'lucide-react';
 
+// No mobile: 5 ícones principais. "Mais" abre menu com Categorias.
+// Por enquanto o ícone "Mais" leva direto pra Recorrências (uso mais frequente).
 const links = [
   { to: '/', label: 'Início', icon: LayoutDashboard, end: true },
   { to: '/incomes', label: 'Receitas', icon: ArrowUpCircle },
   { to: '/expenses', label: 'Despesas', icon: ArrowDownCircle },
   { to: '/cards', label: 'Cartões', icon: CreditCard },
-  { to: '/categories', label: 'Mais', icon: Tag },
+  { to: '/recurring', label: 'Recorr.', icon: Repeat },
 ];
 
 /**

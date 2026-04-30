@@ -227,6 +227,80 @@ export const cardService = {
 };
 
 /**
+ * RecurringService — gerencia transações recorrentes (modelos).
+ * --------------------------------------------------------------
+ * Modelos = "templates" que geram transações reais nos meses.
+ * O frontend chama generateForMonth() ao abrir um mês — a função SQL
+ * cria as transações que faltam (idempotente, não duplica).
+ */
+export const recurringService = {
+  async list() {
+    const { data, error } = await supabase
+      .from('recurring_transactions')
+      .select(`*, category:categories(*), credit_card:credit_cards(*)`)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async create(payload) {
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from('recurring_transactions')
+      .insert({
+        user_id: userId,
+        type: payload.type,
+        amount: payload.amount,
+        description: payload.description,
+        category_id: payload.category_id,
+        credit_card_id: payload.credit_card_id || null,
+        day_of_month: payload.day_of_month,
+        start_month: payload.start_month, // YYYY-MM-DD (dia 1 do mês de início)
+        active: true,
+      })
+      .select(`*, category:categories(*), credit_card:credit_cards(*)`)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async update(id, payload) {
+    const { data, error } = await supabase
+      .from('recurring_transactions')
+      .update(payload)
+      .eq('id', id)
+      .select(`*, category:categories(*), credit_card:credit_cards(*)`)
+      .single();
+    if (error) throw error;
+    return data;
+  },
+
+  async toggleActive(id, active) {
+    const { error } = await supabase
+      .from('recurring_transactions')
+      .update({ active })
+      .eq('id', id);
+    if (error) throw error;
+  },
+
+  async remove(id) {
+    const { error } = await supabase.from('recurring_transactions').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  /**
+   * Gera as transações recorrentes do mês informado.
+   * Idempotente: se já tiverem sido geradas, não duplica.
+   * Retorna quantas foram criadas (0 = nada novo).
+   */
+  async generateForMonth(month) {
+    const { data, error } = await supabase.rpc('generate_recurring_for_month', { p_month: month });
+    if (error) throw error;
+    return data || 0;
+  },
+};
+
+/**
  * DashboardService — usa as RPC functions criadas no schema.sql
  * Aceita mês de referência ('YYYY-MM') para todas as agregações.
  */
@@ -238,7 +312,6 @@ export const dashboardService = {
       supabase.rpc('get_expenses_by_category', { p_month: referenceMonth }).then((r) => r.data || []),
       supabase.rpc('get_monthly_history', { p_months: 6 }).then((r) => r.data || []),
     ]);
-
     // Normaliza pra estrutura que o frontend já consome
     const balanceObj = {
       balance: Number(balance.balance) || 0,

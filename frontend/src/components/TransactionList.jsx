@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pencil, Trash2, CreditCard as CardIcon, Check } from 'lucide-react';
+import { Pencil, Trash2, CreditCard as CardIcon, Check, Repeat } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/format';
 import Modal from './Modal';
 import TransactionForm from './TransactionForm';
@@ -100,6 +100,14 @@ export default function TransactionList({
                     >
                       {t.description}
                     </h4>
+                    {t.recurring_id && (
+                      <span
+                        className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] md:text-[10px] font-bold uppercase tracking-wider bg-ink-900 text-accent whitespace-nowrap"
+                        title="Esta é uma transação recorrente"
+                      >
+                        <Repeat className="w-3 h-3" strokeWidth={2.5} /> Recorrente
+                      </span>
+                    )}
                     {card && (
                       <span
                         className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-white whitespace-nowrap"
