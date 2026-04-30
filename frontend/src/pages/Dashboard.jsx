@@ -72,7 +72,7 @@ export default function Dashboard() {
             Bem vindo!
           </p>
           <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-1 leading-tight">
-            💸​ Vivendo Abaixo Da Linha Da Pobreza 💸​
+            💸Painel Financeiro💸​
           </h1>
         </div>
 
