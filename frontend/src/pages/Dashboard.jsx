@@ -66,10 +66,10 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 md:gap-4">
         <div className="min-w-0">
           <p className="text-[10px] md:text-xs uppercase tracking-widest text-ink-500 font-semibold">
-            Painel principal
+            Bem vindo!
           </p>
           <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-1 leading-tight">
-            Suas finanças em um relance
+            Painel Financeiro🪙
           </h1>
         </div>
 
